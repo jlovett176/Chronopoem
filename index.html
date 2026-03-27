@@ -20,7 +20,7 @@
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
             overflow: hidden; 
             -webkit-font-smoothing: antialiased;
-            background-image: url("https://www.transparenttextures.com/patterns/snow.png"); /* Fine Paper Texture */
+            background-image: url("https://www.transparenttextures.com/patterns/snow.png"); 
         }
 
         #ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
@@ -127,8 +127,13 @@ function draw() {
     
     document.getElementById('digital-clock').innerText = nf(h,2)+":"+nf(m,2)+":"+nf(s,2);
 
+    // ARCHIVE TRIGGER: Check for 6-min bucket change to save previous poem
+    if (b !== lastB && lastB !== -1) {
+        archive(lastH, lastB, currentPoemString);
+    }
+
+    // UPDATE STATE & GENERATE NEW
     if (b !== lastB || h !== lastH || particles.length === 0) {
-        if (currentPoemString !== "" && lastB !== -1) archive(lastH, lastB, currentPoemString);
         document.getElementById('mood-display').innerText = MOODS[h % 24];
         document.getElementById('rule-log').innerText = "Constraint // " + RULES[b % 10];
         gen(); 
@@ -160,8 +165,13 @@ function gen() {
 }
 
 function archive(h, b, txt) {
+    if (!txt || txt === "") return;
     let memory = JSON.parse(localStorage.getItem('chronoArchive') || "[]");
     let ts = nf(h,2) + ":" + nf(b*6,2);
+    
+    // Prevent double-saving the same timestamp
+    if (memory.length > 0 && memory[0].ts === ts) return;
+
     memory.unshift({ ts: ts, txt: txt });
     if (memory.length > 5) memory.pop();
     localStorage.setItem('chronoArchive', JSON.stringify(memory));
