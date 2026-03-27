@@ -6,156 +6,104 @@
     <title>Chronopoem // Johnathan Lovett</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <style>
-        :root { --bg: #F9F7F2; --ink: #002B5B; --gray: #A0B3C1; --faint: #E8E4D9; }
-        body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Georgia", serif; overflow: hidden; }
+        :root { --bg: #FFFFFF; --ink: #001A33; --accent: #0044CC; --gray: #CED4DA; --faint: #F8F9FA; }
+        body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
         #ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
-        header { margin-top: 50px; text-align: center; z-index: 10; }
-        h1 { font-style: italic; font-weight: 400; font-size: 1rem; letter-spacing: 6px; text-transform: uppercase; margin: 0; opacity: 0.8; }
-        #digital-clock { font-size: 0.6rem; letter-spacing: 4px; margin-top: 10px; opacity: 0.4; }
-        
-        /* LHS Archive Sidebar */
-        #sidebar { 
-            position: fixed; left: 30px; top: 50%; transform: translateY(-50%); 
-            width: 200px; display: flex; flex-direction: column; gap: 20px; 
-            pointer-events: auto; z-index: 5; 
-        }
-        .log-entry { 
-            font-size: 0.55rem; line-height: 1.6; color: var(--gray); 
-            border-left: 1px solid var(--faint); padding-left: 15px;
-            transition: all 0.4s ease; opacity: 0; transform: translateX(-10px);
-        }
-        .log-entry.visible { opacity: 1; transform: translateX(0); }
-        .log-entry:hover { color: var(--ink); border-left: 1px solid var(--ink); }
-        .log-time { font-weight: bold; margin-bottom: 4px; display: block; letter-spacing: 1px; color: var(--ink); opacity: 0.6; }
-
-        #meta { position: fixed; bottom: 45px; width: 100%; text-align: center; display: flex; flex-direction: column; gap: 12px; }
-        #mood-display { font-style: italic; font-size: 0.9rem; max-width: 60%; margin: 0 auto; line-height: 1.5; }
-        #rule-log { font-size: 0.55rem; color: var(--gray); text-transform: uppercase; letter-spacing: 3px; }
-        #credit { font-size: 0.55rem; letter-spacing: 4px; text-transform: uppercase; opacity: 0.6; margin-top: 8px; }
+        header { margin-top: 60px; text-align: center; z-index: 10; }
+        h1 { font-weight: 300; font-size: 0.85rem; letter-spacing: 0.5em; text-transform: uppercase; margin: 0; }
+        #digital-clock { font-size: 0.6rem; letter-spacing: 0.3em; margin-top: 15px; opacity: 0.3; font-family: monospace; }
+        #sidebar { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); width: 220px; display: flex; flex-direction: column; gap: 20px; pointer-events: auto; z-index: 5; }
+        .log-entry { font-family: "Georgia", serif; font-size: 0.58rem; line-height: 1.7; color: #888; border-left: 1px solid #EEE; padding-left: 20px; transition: all 0.6s ease; }
+        .log-entry:hover { color: var(--accent); border-left-color: var(--accent); }
+        .log-time { font-family: monospace; font-size: 0.5rem; font-weight: bold; margin-bottom: 4px; display: block; letter-spacing: 2px; opacity: 0.3; }
+        #meta { position: fixed; bottom: 50px; width: 100%; text-align: center; display: flex; flex-direction: column; gap: 15px; }
+        #mood-display { font-family: "Georgia", serif; font-style: italic; font-size: 0.95rem; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+        #rule-log { font-family: monospace; font-size: 0.5rem; color: var(--gray); text-transform: uppercase; letter-spacing: 4px; }
+        #credit { font-size: 0.5rem; letter-spacing: 5px; text-transform: uppercase; opacity: 0.4; }
     </style>
 </head>
 <body>
     <div id="sidebar"></div>
     <div id="ui">
-        <header>
-            <h1>Chronopoem</h1>
-            <div id="digital-clock">00:00:00</div>
-        </header>
+        <header><h1>Chronopoem</h1><div id="digital-clock">00:00:00</div></header>
         <div id="meta">
-            <div id="mood-display">...</div>
-            <div id="rule-log">...</div>
-            <div id="credit">Poetics by Johnathan Lovett</div>
+            <div id="mood-display">...</div><div id="rule-log">...</div>
+            <div id="credit">Johnathan Lovett // Tokyo-Paris Archive</div>
         </div>
     </div>
-
 <script>
-let particles = [];
-let lastB = -1;
-let lastH = -1;
-let currentPoemString = "";
-
-const MOODS = ["Midnight: A thread of light between the ribs.", "1AM: The census of the invisible.", "2AM: A vocabulary of salt and heavy water.", "3AM: The sharpest distance between two thoughts.", "4AM: Blue ash rising from the perimeter.", "5AM: A geography of unread letters.", "6AM: Iron morning, the lung’s cold clockwork.", "7AM: Glass pulses in the architecture of sleep.", "8AM: The shadow’s brief occupancy of the street.", "9AM: A hard thought, geometric and unkind.", "10AM: The vertical weight of the standing hour.", "11AM: A void centered in the noon-light.", "12PM: Day’s collapse into the throat of the well.", "1PM: Echoes of a noon that never arrived.", "2PM: Amber drifts across the forgotten manuscript.", "3PM: Tokyo neon, a pulse beneath the eyelid.", "4PM: Gilded rain, the syntax of the afternoon.", "5PM: Lanterns glowing in the salt-marsh.", "6PM: The quiet wine of a closing interior.", "7PM: Blue hour, the world’s softest friction.", "8PM: The final page turning in an empty room.", "9PM: An echo chamber of unspoken Names.", "10PM: Soft static on the radio of the soul.", "11PM: The reveal of the dark’s long geometry."];
+let particles = [], lastB = -1, lastH = -1, currentPoemString = "";
+const MOODS = ["00:00 — A thread of light between the ribs.", "01:00 — The census of the invisible.", "02:00 — A vocabulary of salt and heavy water.", "03:00 — The sharpest distance between two thoughts.", "04:00 — Blue ash rising from the perimeter.", "05:00 — A geography of unread letters.", "06:00 — Iron morning, the lung’s cold clockwork.", "07:00 — Glass pulses in the architecture of sleep.", "08:00 — The shadow’s brief occupancy of the street.", "09:00 — A hard thought, geometric and unkind.", "10:00 — The vertical weight of the standing hour.", "11:00 — A void centered in the noon-light.", "12:00 — Day’s collapse into the throat of the well.", "13:00 — Echoes of a noon that never arrived.", "14:00 — Amber drifts across the forgotten manuscript.", "15:00 — Tokyo neon, a pulse beneath the eyelid.", "16:00 — Gilded rain, the syntax of the afternoon.", "17:00 — Lanterns glowing in the salt-marsh.", "18:00 — The quiet wine of a closing interior.", "19:00 — Blue hour, the world’s softest friction.", "20:00 — The final page turning in an empty room.", "21:00 — An echo chamber of unspoken Names.", "22:00 — Soft static on the radio of the soul.", "23:00 — The reveal of the dark’s long geometry."];
 const FRAG = {
-    s: ["the stone", "a blueprint", "the lung", "a shadow", "the ink", "a perimeter", "the salt", "a mirror", "the census", "the zinc", "an eyelid", "the lattice", "a needle", "the mercury", "a fossil", "the tendon", "an axis", "the velvet", "a shard", "the thread"],
-    a: ["dissolves in", "rehearses", "fractures", "traces", "suspends", "measures", "forgets", "occupies", "waits within", "asphyxiates", "litters", "punctures", "stains", "collects", "vibrates in", "decodes", "betrays", "anchors", "overflows", "erases"],
-    t: ["blue ash", "heavy water", "the vertical", "cold iron", "unstable light", "silver static", "glass dust", "deep velvet", "burnt sugar", "white noise", "crushed mica", "black honey", "wet slate", "torn silk", "raw linen", "oxidized gold", "frozen breath", "asphalt", "thin smoke", "salt-air"],
-    p: ["at the hour's edge", "under the ribs", "in the architecture", "between breaths", "on the glass", "without witness", "across the threshold", "within the marrow", "behind the retina", "inside the clockwork", "at the zero point", "among the ruins", "against the grain", "under the surface", "through the static", "below the frost", "in the stutter", "at the border", "within the vacuum", "inside the lung"]
+    s: ["blueprint", "lung", "shadow", "ink", "perimeter", "salt", "mirror", "census", "zinc", "eyelid", "lattice", "mercury", "fossil", "tendon", "axis", "velvet", "shard", "obsidian", "pulse", "compass", "resin", "marble", "ghost", "friction", "wire", "vowel", "marrow", "needle", "aperture", "dial"],
+    a: ["dissolves", "rehearses", "fractures", "traces", "suspends", "measures", "forgets", "occupies", "asphyxiates", "litters", "punctures", "stains", "collects", "vibrates", "decodes", "betrays", "anchors", "overflows", "erases", "negotiates", "breathes", "shadows", "ignites", "numbs", "silences", "unfurls", "knots", "carves", "empties"],
+    t: ["blue ash", "heavy water", "vertical", "cold iron", "unstable light", "silver static", "glass dust", "deep velvet", "burnt sugar", "white noise", "crushed mica", "black honey", "wet slate", "torn silk", "raw linen", "oxidized gold", "frozen breath", "asphalt", "thin smoke", "salt-air", "liquid neon", "cracked porcelain", "graphite", "carbon", "dry frost", "mercury vapor", "raw silk", "static", "hologram", "bone dust"],
+    p: ["at hour's edge", "under ribs", "in architecture", "between breaths", "on glass", "without witness", "across threshold", "within marrow", "behind retina", "inside clockwork", "at zero point", "among ruins", "against grain", "under surface", "through static", "below frost", "in stutter", "at border", "within vacuum", "inside lung", "near exit", "between lines", "within lens", "above sediment", "in laboratory", "at terminal", "below skin", "across wire", "in interval", "past echo"]
 };
 const RULES = ["Vowels Drift", "Consonant Anchor", "Staccato Fragments", "Mirroring Time", "Overlap Shadows", "Minimalist Erasure", "Geometry of Jitter", "Orbital Time", "Ghost Initials", "Kinetic Instability"];
 
-class Particle {
-    constructor(t, x, y) {
-        this.t = t;
-        this.pos = createVector(x + random(-5, 5), y + random(-5, 5));
-        this.v = createVector(random(-0.03, 0.03), random(-0.03, 0.03));
-        this.a = 0;
-    }
-    up() {
-        this.pos.add(this.v);
-        if (this.a < 255) this.a += 3;
-    }
-    sh() {
-        fill(0, 43, 91, this.a);
-        noStroke();
-        textSize(14);
-        text(this.t, this.pos.x, this.pos.y);
-    }
+class P {
+    constructor(t,x,y) { this.t=t; this.pos=createVector(x+random(-2,2),y+random(-2,2)); this.v=createVector(random(-0.02,0.02),random(-0.02,0.02)); this.a=0; }
+    up() { this.pos.add(this.v); if(this.a<255) this.a+=2; }
+    sh() { fill(0,26,51,this.a); noStroke(); textSize(13); text(this.t, this.pos.x, this.pos.y); }
 }
 
-function setup() {
-    createCanvas(windowWidth, windowHeight);
+function setup() { 
+    createCanvas(windowWidth, windowHeight); 
     textAlign(CENTER, CENTER);
-    textFont('Georgia');
+    loadMemory(); 
 }
 
 function draw() {
-    background('#F9F7F2');
-    let h = hour(), m = minute(), s = second();
-    let b = Math.floor(m / 6);
-    let prg = ((m % 6) * 60 + s) / 360;
+    background(255);
+    let h=hour(), m=minute(), s=second(), b=Math.floor(m/6), prg=((m%6)*60+s)/360;
+    document.getElementById('digital-clock').innerText = nf(h,2)+":"+nf(m,2)+":"+nf(s,2);
 
-    document.getElementById('digital-clock').innerText = nf(h, 2) + ":" + nf(m, 2) + ":" + nf(s, 2);
-
-    // AUTO-UPDATE TRIGGER
     if (b !== lastB || h !== lastH || particles.length === 0) {
-        if (currentPoemString !== "" && particles.length > 0) {
-            archive(lastH, lastB, currentPoemString);
-        }
+        if (currentPoemString !== "" && lastB !== -1) archive(lastH, lastB, currentPoemString);
         document.getElementById('mood-display').innerText = MOODS[h % 24];
-        document.getElementById('rule-log').innerText = "Constraint: " + RULES[b % 10];
-        gen();
-        lastB = b; lastH = h;
+        document.getElementById('rule-log').innerText = "System Constraint // " + RULES[b % 10];
+        gen(); lastB=b; lastH=h;
     }
-
-    // VISUAL CLOCK RING
-    noFill(); stroke(0, 43, 91, 15); ellipse(width/2, height/2, 420, 420);
-    stroke(0, 43, 91, 60); arc(width/2, height/2, 420, 420, -HALF_PI, -HALF_PI + (TWO_PI * prg));
-
-    for (let p of particles) {
-        phys(p, b); p.up(); p.sh();
-    }
+    noFill(); stroke(0,68,204,10); ellipse(width/2, height/2, 450, 450);
+    stroke(0,68,204,45); arc(width/2, height/2, 450, 450, -HALF_PI, -HALF_PI+(TWO_PI*prg));
+    for (let p of particles) { phys(p, b); p.up(); p.sh(); }
 }
 
 function gen() {
     particles = []; currentPoemString = "";
-    for (let i = 0; i < 4; i++) {
-        let l = (i % 2 === 0) ? 
-            `${random(FRAG.s)} ${random(FRAG.a)} ${random(FRAG.t)}` : 
-            `${random(FRAG.p)} ${random(FRAG.s)} ${random(FRAG.a)}`;
-        currentPoemString += l + "<br>";
-        let wds = l.split(' ');
-        wds.forEach((w, j) => {
-            particles.push(new Particle(w, width/2 - (wds.length * 20) + (j * 60), height/2 - 50 + (i * 35)));
-        });
+    for (let i=0; i<4; i++) {
+        let l = (i%2==0) ? `${random(FRAG.s)} ${random(FRAG.a)} ${random(FRAG.t)}` : `${random(FRAG.p)} ${random(FRAG.s)} ${random(FRAG.a)}`;
+        currentPoemString += l + (i<3 ? "<br>" : "");
+        l.split(' ').forEach((w,j) => particles.push(new P(w, width/2-(l.split(' ').length*18)+(j*55), height/2-60+(i*40))));
     }
 }
 
 function archive(h, b, txt) {
-    if (h === -1) return; // Prevent logging on first load
+    let memory = JSON.parse(localStorage.getItem('chronoArchive') || "[]");
+    let ts = nf(h,2) + ":" + nf(b*6,2);
+    memory.unshift({ ts: ts, txt: txt });
+    if (memory.length > 5) memory.pop();
+    localStorage.setItem('chronoArchive', JSON.stringify(memory));
+    renderSidebar(memory);
+}
+
+function loadMemory() {
+    let memory = JSON.parse(localStorage.getItem('chronoArchive') || "[]");
+    renderSidebar(memory);
+}
+
+function renderSidebar(data) {
     const sb = document.getElementById('sidebar');
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
-    const ts = nf(h, 2) + ":" + nf(b * 6, 2);
-    entry.innerHTML = `<span class="log-time">${ts}</span>${txt}`;
-    
-    sb.prepend(entry);
-    // Trigger animation
-    setTimeout(() => entry.classList.add('visible'), 50);
-
-    // Maintain exactly 5 iterations
-    if (sb.children.length > 5) {
-        sb.removeChild(sb.lastChild);
-    }
+    sb.innerHTML = "";
+    data.forEach(item => {
+        let e = document.createElement('div');
+        e.className = 'log-entry';
+        e.innerHTML = `<span class="log-time">${item.ts} — ARCHIVE</span>${item.txt}`;
+        sb.appendChild(e);
+    });
 }
 
-function phys(p, b) {
-    if (b === 0) p.pos.y -= 0.15;
-    if (b === 1) p.pos.y += 0.15;
-    if (b === 6 || b === 9) { p.pos.x += random(-0.5, 0.5); p.pos.y += random(-0.5, 0.5); }
-    if (b === 5) p.a -= 0.4;
-}
-
+function phys(p, b) { if(b==0) p.pos.y-=0.1; if(b==1) p.pos.y+=0.1; if(b==6||b==9) p.pos.add(p5.Vector.random2D().mult(0.3)); if(b==5) p.a-=0.3; }
 function windowResized() { resizeCanvas(windowWidth, windowHeight); }
-</script>
-</body>
-</html>
+</script></body></html>
