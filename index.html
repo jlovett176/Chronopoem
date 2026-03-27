@@ -3,165 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronopoem — Shifting Time</title>
+    <title>Chronopoem // Verse 3.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <style>
         :root { --bg: #F9F7F2; --ink: #002B5B; --gray: #A0B3C1; }
-        body { margin: 0; background: var(--bg); color: var(--ink); font-family: serif; overflow: hidden; }
+        body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Georgia", serif; overflow: hidden; }
         
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        #ui {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; display: flex; flex-direction: column; align-items: center;
         }
 
-        header { margin-top: 40px; text-align: center; pointer-events: auto; }
-        h1 { font-style: italic; font-weight: 400; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
+        header { margin-top: 50px; text-align: center; }
+        h1 { font-style: italic; font-weight: 400; font-size: 1.1rem; letter-spacing: 5px; text-transform: uppercase; margin: 0; }
+        #digital-clock { font-size: 0.75rem; letter-spacing: 2px; margin-top: 10px; opacity: 0.6; }
         
-        #rule-display { 
-            position: fixed; bottom: 100px; font-size: 0.7rem; color: var(--gray); 
-            text-transform: uppercase; letter-spacing: 1px; border: 1px solid var(--gray);
-            padding: 5px 15px; border-radius: 20px; transition: opacity 0.3s;
+        #rule-log { 
+            position: fixed; bottom: 40px; font-size: 0.65rem; color: var(--gray); 
+            text-transform: uppercase; letter-spacing: 2px;
         }
-
-        #snapshot-container {
-            position: fixed; bottom: 20px; display: flex; gap: 20px; 
-            width: 100%; justify-content: center; pointer-events: auto;
-        }
-        .snapshot { font-size: 0.6rem; color: var(--gray); cursor: pointer; border-bottom: 1px solid transparent; }
-        .snapshot:hover { color: var(--ink); border-bottom: 1px solid var(--ink); }
-
-        .hidden { opacity: 0; }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
+    <div id="ui">
         <header>
             <h1>Chronopoem</h1>
-            <div id="clock-digital" style="font-size: 0.8rem; letter-spacing: 3px; margin-top: 10px;">00:00:00</div>
+            <div id="digital-clock">00:00:00</div>
         </header>
-
-        <div id="rule-display" onclick="toggleRule()">Rule: Loading...</div>
-
-        <div id="snapshot-container">
-            <span class="snapshot" onclick="takeSnapshot()">[ FREEZE MOMENT ]</span>
-        </div>
+        <div id="rule-log">Loading Temporal Constraints...</div>
     </div>
 
 <script>
 let particles = [];
-let currentPoem = [];
-let lastMinuteBucket = -1;
+let lastBucket = -1;
 
-const MOODS = [
-    "Midnight: The ink is heavy.", "1AM: Sleep is a ghost.", "2AM: Echoes in the hall.", "3AM: The sharpest hour.",
-    "4AM: Blue light rising.", "5AM: Birds before dawn.", "6AM: Cold coffee, silver sky.", "7AM: The world awakens.",
-    "8AM: Commute of shadows.", "9AM: Iron and glass.", "10AM: Precision of thought.", "11AM: High sun, no shade.",
-    "12PM: The collapse of day.", "1PM: Echoes of lunch.", "2PM: The slow descent.", "3PM: Dust motes dancing.",
-    "4PM: Long shadows, Paris.", "5PM: Gold leaf on water.", "6PM: The closing of doors.", "7PM: Lanterns and rain.",
-    "8PM: Quiet wine, dark ink.", "9PM: Tokyo neon pulse.", "10PM: The city breathes.", "11PM: Finality of light."
-];
-
-const RULES = [
-    "Vowels only drift.", "Consonants anchor.", "Short staccato lines.", "One word per breath.",
-    "Geometric alignment.", "Unstable jitter.", "Ascending gravity.", "Mirroring time.",
-    "Minimalist void.", "Dense overlap."
-];
-
-function setup() {
-    createCanvas(windowWidth, windowHeight);
-    textFont('Georgia');
-}
-
-function draw() {
-    background(249, 247, 242); // Bone Cream
-    
-    let h = hour();
-    let m = minute();
-    let s = second();
-    let bucket = floor(m / 6);
-
-    // Update UI
-    document.getElementById('clock-digital').innerText = nf(h, 2) + ":" + nf(m, 2) + ":" + nf(s, 2);
-    document.getElementById('rule-display').innerText = "Mood: " + MOODS[h] + " / Rule: " + RULES[bucket];
-
-    // Draw Clock Circle
-    noFill();
-    stroke(0, 43, 91, 50); // Ink blue transparent
-    strokeWeight(1);
-    ellipse(width/2, height/2, 400, 400);
-
-    // New Poem Generation every 6 minutes
-    if (bucket !== lastMinuteBucket) {
-        generatePoem(h, bucket);
-        lastMinuteBucket = bucket;
-    }
-
-    // Physics & Rendering
-    particles.forEach(p => {
-        p.update();
-        p.display();
-    });
-}
-
-function generatePoem(h, b) {
-    particles = [];
-    // Conceptual Poem Generation based on Time
-    let baseLines = [
-        "time is " + h + " parts shadow",
-        "and " + b + " parts salt",
-        "the clock is a lung",
-        "breathing blue ink"
-    ];
-
-    let startY = height/2 - 40;
-    baseLines.forEach((line, index) => {
-        let words = line.split(' ');
-        words.forEach((word, wIdx) => {
-            particles.push(new Particle(word, width/2 - 50 + (wIdx * 40), startY + (index * 25)));
-        });
-    });
-}
-
-class Particle {
-    constructor(t, x, y) {
-        this.text = t;
-        this.pos = createVector(x, y);
-        this.vel = createVector(random(-0.2, 0.2), random(-0.2, 0.2));
-        this.alpha = 0;
-    }
-
-    update() {
-        this.pos.add(this.vel);
-        if (this.alpha < 255) this.alpha += 2;
-        // Subtle drift
-        this.pos.x += sin(frameCount * 0.01) * 0.1;
-    }
-
-    display() {
-        fill(0, 43, 91, this.alpha);
-        noStroke();
-        textSize(16);
-        text(this.text, this.pos.x, this.pos.y);
-    }
-}
-
-function takeSnapshot() {
-    let canvas = document.querySelector('canvas');
-    let dataURL = canvas.toDataURL('image/png');
-    let link = document.createElement('a');
-    link.download = 'chronopoem_snapshot.png';
-    link.href = dataURL;
-    link.click();
-}
-
-function toggleRule() {
-    document.getElementById('rule-display').classList.toggle('hidden');
-}
-
-function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
-}
-</script>
-</body>
-</html>
+// 24 Moods for 24 Hours
+const
